@@ -18,6 +18,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
     ];
@@ -64,4 +65,16 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    // Menambahkan metode untuk Passport
+    // public function findForPassport($username)
+    // {
+    //     return $this->where('username', $username)->first();
+    // }
+
+    // Menambahkan metode untuk Sanctum
+    // public function findForSanctum($username)
+    // {
+    //     return $this->where('username', $username)->first();
+    // }
 }

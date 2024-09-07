@@ -15,16 +15,18 @@ use OpenApi\Annotations as OA;
  * )**/
 class AuthController extends BaseController
 {
+    // php artisan l5-swagger:generate
     /**
      * @OA\Post(
-     *     path="/api/register",
+     *     path="/api/auth/register",
      *     tags={"Auth"}, 
      *     summary="Register a new user",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="name", type="string", example="John Doe"),
-     *             @OA\Property(property="email", type="string", example="johndoe@example.com"),
+     *             @OA\Property(property="email", type="string", example="hendynursholeh713@gmail.com"),
+     *             @OA\Property(property="username", type="string", example="hendy25"),
      *             @OA\Property(property="password", type="string", format="password", example="password123"),
      *             @OA\Property(property="c_password", type="string", format="password", example="password123")
      *         )
@@ -50,20 +52,43 @@ class AuthController extends BaseController
      * )
      */
     public function register(Request $request) {
-        // Validasi input
+        // Validasi input dengan custom message
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
+            'username' => [
+                'required',
+                'unique:users,username',
+                'regex:/^\S*$/u' // regex untuk melarang spasi
+            ],
             'password' => 'required',
             'c_password' => 'required|same:password',
+        ], [
+            'name.required' => 'Nama wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'username.required' => 'Username wajib diisi.',
+            'username.unique' => 'Username sudah digunakan.',
+            'username.regex' => 'Username tidak boleh mengandung spasi.',
+            'password.required' => 'Kata sandi wajib diisi.',
+            'c_password.required' => 'Konfirmasi kata sandi wajib diisi.',
+            'c_password.same' => 'Konfirmasi kata sandi tidak sesuai dengan kata sandi.'
         ]);
     
-        // Jika validasi gagal, kembalikan error dengan status 422
+        // Jika validasi gagal, ambil pesan error pertama per field
         if ($validator->fails()) {
+            $errors = $validator->errors();
+            $firstErrors = [];
+    
+            foreach ($errors->keys() as $key) {
+                $firstErrors[$key] = $errors->first($key);
+            }
+    
             return response()->json([
                 'status' => 'error',
-                'message' => 'Validation Error',
-                'errors' => $validator->errors()
+                'message' => 'Validasi gagal',
+                'errors' => $firstErrors // Mengembalikan hanya pesan error pertama per field
             ], 422);
         }
     
@@ -78,55 +103,74 @@ class AuthController extends BaseController
         // Kembalikan respons sukses dengan status 201 Created
         return response()->json([
             'status' => 'success',
-            'message' => 'User registered successfully.',
+            'message' => 'Pengguna berhasil didaftarkan.',
             'data' => $success
         ], 201);
+    }
+    
+    
+
+    public function test(){
+        echo "hahha";
+        
     }
 
 
     /**
-     * @OA\Post(
-     *     path="/api/login",
-     *     tags={"Auth"}, 
-     *     summary="Log in a user",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="email", type="string", example="johndoe@example.com"),
-     *             @OA\Property(property="password", type="string", format="password", example="password123")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="User logged in successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="string", example="success"),
-     *             @OA\Property(property="message", type="string", example="User logged in successfully."),
-     *             @OA\Property(property="token", type="string", example="your_jwt_token_here")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="string", example="error"),
-     *             @OA\Property(property="message", type="string", example="Invalid credentials.")
-     *         )
-     *     )
-     * )
-     */
-    public function login()
-    {
-        $credentials = request(['email', 'password']);
-  
-        if (! $token = auth()->attempt($credentials)) {
-            return $this->sendError('Unauthorised.', ['error'=>'Unauthorised']);
-        }
-  
-        $success = $this->respondWithToken($token);
-   
-        return $this->sendResponse($success, 'User login successfully.');
+ * @OA\Post(
+ *     path="/api/auth/login",
+ *     tags={"Auth"}, 
+ *     summary="Log in a user",
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="username", type="string", example="otong"),
+ *             @OA\Property(property="password", type="string", format="password", example="otong123")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="User logged in successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="success"),
+ *             @OA\Property(property="message", type="string", example="User logged in successfully."),
+ *             @OA\Property(property="token", type="string", example="your_jwt_token_here")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthorized",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="error"),
+ *             @OA\Property(property="message", type="string", example="Invalid credentials.")
+ *         )
+ *     )
+ * )
+ */
+public function login()
+{
+    // Mengambil kredensial username dan password
+    $credentials = request(['username', 'password']);
+
+    // Autentikasi menggunakan kolom username
+    if (! $token = auth()->attempt($credentials)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized',
+            'data' => ['error' => 'Unauthorized']
+        ], 401);
     }
+
+    // Mendapatkan token dan mengembalikan respons sukses
+    $success = $this->respondWithToken($token);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User login successfully.',
+        'data' => $success
+    ], 200);
+}
+
 
 
     public function profile() {
@@ -137,7 +181,7 @@ class AuthController extends BaseController
 
     /**
      * @OA\Post(
-     *     path="/api/logout",
+     *     path="/api/auth/logout",
      *     tags={"Auth"}, 
      *     summary="Log out a user",
      *     @OA\Response(

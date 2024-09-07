@@ -6,13 +6,13 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/api/register": {
+        "/api/auth/register": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Register a new user",
-                "operationId": "a718f172ff3ac464d723835815f8fb57",
+                "operationId": "eb3623f9bcd09a1dacbefaac07aed1bb",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -25,7 +25,11 @@
                                     },
                                     "email": {
                                         "type": "string",
-                                        "example": "johndoe@example.com"
+                                        "example": "hendynursholeh713@gmail.com"
+                                    },
+                                    "username": {
+                                        "type": "string",
+                                        "example": "hendy25"
                                     },
                                     "password": {
                                         "type": "string",
@@ -102,27 +106,27 @@
                 }
             }
         },
-        "/api/login": {
+        "/api/auth/login": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Log in a user",
-                "operationId": "44212a9096e4b09358281e9ec8a0701d",
+                "operationId": "f77777235d676b651c9465807d8f9485",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "email": {
+                                    "username": {
                                         "type": "string",
-                                        "example": "johndoe@example.com"
+                                        "example": "otong"
                                     },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
-                                        "example": "password123"
+                                        "example": "otong123"
                                     }
                                 },
                                 "type": "object"
@@ -178,13 +182,13 @@
                 }
             }
         },
-        "/api/logout": {
+        "/api/auth/logout": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Log out a user",
-                "operationId": "79854151e609bd20032aa5aa4d5a35c0",
+                "operationId": "c4b3c6f1776909e546a421283c044ac3",
                 "responses": {
                     "200": {
                         "description": "User logged out successfully",
